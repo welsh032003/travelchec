@@ -42,8 +42,8 @@
 <!--Main content area started--> 
 <div class="content">
   <div class="content-body"><br><br>
-    <h1>Motor Vehicle Management</h1>
-<a class="btn btn-primary"s href="add_motor_vehicle.php">Add Motor Vehicle</a><br><br><br>
+    <h1>Motor Vehicle Documents</h1>
+<br><br><br>
 <?php
 if(!empty($_GET['message'])) {
 $message = $_GET['message'];
@@ -52,59 +52,32 @@ $message = $_GET['message'];
 ?>
     <table id="customers">
   <tr>
-    <th>No</th>
     <th>Employee</th>
-    <th>Engine #</th>
-    <th>Chassis #</th>
-    <th>Make</th>
-    <th>Model</th>
-    <th>Year</th>
-    <th>Doc</th>
-    <th>Reassign <i class="fas fa-car"></i></th>
+    <th>License #</th>
+    <th>License Expire</th>
+    <th>Reg. Expire</th>
+    <th>Insurance Expire</th>
+    <th>Fitness Expire</th>
   </tr>
 
   <?php
   include 'inc/config.php';
 
-  $select = "SELECT mv.status, mv.id as mvid, mv.model, md.id, md.name as modl, my.id, mv.year, my.year as yea, m.id, m.name, mv.emp_id, mv.EngineNo, e.id, e.first_name, e.last_name, mv.make, mv.model, mv.year, mv.ChassisNo
-  FROM motor_vehicle mv
-  JOIN employee_details e on mv.emp_id = e.id
-  JOIN makes m on mv.make = m.id
-  JOIN make_years my on mv.year = my.id
-  JOIN models md on mv.model = md.id 
-  ORDER BY mv.status ASC";
+  $select = "SELECT mvd.emp_id, mvd.licenseno, mvd.licenseexpire, mvd.regexpire, mvd.insuranceexpire, mvd.fitnessexpire, e.id, e.first_name, e.last_name
+  FROM motor_vehicle_document mvd
+  left JOIN employee_details e ON mvd.id = e.id ";
 
+echo "$select";
   $query = mysqli_query($conn, $select);
   if (mysqli_num_rows($query) != 0) {
     while ($row = mysqli_fetch_assoc($query)) { ?>
       <tr>
-        <td><?php echo $row['mvid']; ?></td>
         <td><?php echo $row['last_name']; ?>, <?php echo $row['first_name']; ?></td>
-        <td><?php echo $row['EngineNo']; ?></td>
-        <td><?php echo $row['ChassisNo']; ?></td>
-        <td><?php echo $row['name']; ?></td>
-        <td><?php echo $row['modl']; ?></td>
-        <td><?php echo $row['yea']; ?></td>
-        <td>
-          <?php
-            $mvid = $row['mvid'];
-            $select_doc = mysqli_query($conn, "SELECT * FROM motor_vehicle_document where mv_id = '$mvid' ");
-            if (mysqli_num_rows($select_doc) != 0 ) { ?>
-            <i style="color: green; text-align: center;" class="fas fa-check-circle"></i>
-          <?php  } else { ?>
-            <i style="color: red; text-align: center;" class="fas fa-times-circle"></i><a href="add_motor_vehicle_document.php?mvid=<?php echo $row['mvid']; ?>">Add</a>
-          <?php  }
-
-          ?>
-        </td>
-  
-          <?php 
-            if ($row['status'] == 'reassigned') { ?>
-        <td style="background-color: green; color: white; font-weight: bold;"><p >Reassigned</p></td>   
-          <?php  } else { ?>
-        <td><a id="reassign_vehicle" data-id="<?php echo $row["id"] ?>"  href="javascript:void(0)"><i class="fas fa-redo t-ico"></i></a></td></td> 
-          <?php }
-          ?>
+        <td><?php echo $row['licenseno']; ?></td>
+        <td><?php echo $row['licenseexpire']; ?></td>
+        <td><?php echo $row['regexpire']; ?></td>
+        <td><?php echo $row['insuranceexpire']; ?></td>
+        <td><?php echo $row['fitnessexpire']; ?></td>
 
      </tr>
    <?php }

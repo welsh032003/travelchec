@@ -6,7 +6,7 @@
 	$password=$_POST['password'];
 
 
-	$check = "SELECT * FROM user_accounts WHERE UserName = '$username' and UserEmail = '$email' ";
+	$check = "SELECT * FROM user_accounts WHERE UserEmail = '$email' ";
 	$query = mysqli_query($conn, $check);
 	if (mysqli_num_rows($query) == 1 ) {
 		print "2";

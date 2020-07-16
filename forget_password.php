@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title> Login </title>
+    <title>Forget Password</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/css/all.min.css">
 <style>
     body{
@@ -48,7 +48,7 @@
         width: 100;
         margin-bottom: 20px;
     }
-    .login-form input[type="text"], input[type="password"]{
+    .login-form input[type="email"], input[type="password"]{
         border: none;
         border-bottom: 1px solid white;
         background: transparent;
@@ -67,6 +67,7 @@
       font-weight: bold;
       border-radius: 20px;
       padding: 4px;
+      width: auto;
     }
     .login-form input[type="submit"]:hover
     {
@@ -79,10 +80,12 @@
       font-weight: bold;
       border-radius: 20px;
       padding: 4px;
+      width: auto;
+
     }
     .login-form a{
         text-decoration: none;
-        font-size: 25px;
+        font-size: 16px;
         color: ghostwhite;
     }
     .login-form a:hover
@@ -171,7 +174,7 @@ header{
     
                <!-- <li><img src="snip.jpg"></li> -->
                  <li><a href="home.php">Home</a></li>
-                 <li><a href="adminpage.php">Back</a></li>
+                 <li><a href="javascript:history.go(-1)">Back</a></li>
              </ul>
         </div>
     </header>
@@ -189,64 +192,25 @@ header{
 
           //Getting Input value
           if(isset($_POST['login'])){
-            $username=mysqli_real_escape_string($conn,$_POST['uname']);
-            $password=mysqli_real_escape_string($conn,$_POST['psw']);
-            $lrole= $_REQUEST['lpage'];
+            $email = mysqli_real_escape_string($conn,$_POST['email']);
 
-          // Check if username and password is blank
-           if(empty($username)&&empty($password)){
-            $error= '<div class="alert alert-danger" role="alert">Enter Username and Password</div>';
+
+          // Check if email is blank
+           if(empty($email)){
+            $error= '<div class="alert alert-danger" role="alert">Please enter email</div>';
            }else{
 
-           //Check Login Detail with database
-           $result=mysqli_query($conn,"SELECT * FROM user_accounts WHERE username='$username' AND password='".md5($password)."' ");
+           //Check if email is associated with a account
+           $result=mysqli_query($conn,"SELECT * FROM user_accounts WHERE UserEmail = '$email' ");
            $row=mysqli_fetch_assoc($result);
            $count=mysqli_num_rows($result);
 
 
           if ($count==1) {
-
-
-          if ($row['UserType'] != $lrole && $row['UserType'] != 'sysadmin') {
-           $error= '<div class="alert alert-danger" role="alert">Access Denied</div>';
-         }else{
-
-           //Audit logim
-           $audit_type = "Login";
-           $audit_message = "login successfully";
-           $audit_insert = "INSERT INTO audit_system (`user`, `message`, `type`) VALUES ('$username', '$audit_message', '$audit_type') ";
-           $audit_query = mysqli_query($conn, $audit_insert) or die(mysqli_error());
-
-
-           //Session login time
-           $_SESSION["login_time_stamp"] = time();
-
-           //Define session varible
-            $_SESSION['user']=array(
-           'id'=>$row['id'],
-           'username'=>$row['UserName'],
-           'role'=>$row['UserType']
-           );
-           $role=$_SESSION['user']['role'];
-
-
-           //Redirecting User Based on Role
-            switch($role){
-          case 'hr':
-          header('location: adminpage.php');
-          break;
-          case 'accounts':
-          header('location: adminpage.php');
-          break;
-          case 'sysadmin':
-          header('location: adminpage.php');
-          break;
-
-         }
-     }
+            header('location: password_recovery_option.php?uid='.$row["id"].'');
 
       }else {
-        $error='<div class="alert alert-danger" role="alert">No account found</div>';
+        $error='<div class="alert alert-danger" role="alert">No account found with email: '.$email.'</div>';
       }
      }
 
@@ -255,60 +219,24 @@ header{
 
 
         <?php if(isset($error)){ echo $error; }?>
-        <h1>Login</h1>
-    <?php
-      if (isset($_REQUEST['lpage'])) { ?>
+        <h1>Forget Password</h1><br><br>
+ 
         <form action="" method="post">
           <div>
-          <p>Username</p>
-          <input type="text" id="uname" name="uname" /> <br/>
+          <p>Email:</p>
+          <input type="email" id="email" name="email" /> <br/>
           </div>
           <div>
-          <p>Password</p> 
-
-        <div class="first-example">
-          <input type= "password" id="psw" name= "psw" /> <br/>
-          <i id="pass-status" class="fa fa-eye" aria-hidden="true" onClick="viewPassword()"></i>
-        </div>
-
-          <input type="submit" id="login" name="login" value="Login"/><br/>
+          
+          <input type="submit" id="login" name="login" value="Reset Password"/><br/>
           </div>
           <div>
-          <a href="forget_password.php">Forget Password</a> <br/> <br/>
            
           </div>
         </form>
-    <?php  } else { ?>
-        <h2>Select Login Type:</h2>
-        <h4><a href="login.php?lpage=hr">Human Resource <i class="fas fa-arrow-right"></i></a></h4>
-        <h4><a href="login.php?lpage=accounts">Accounts <i class="fas fa-arrow-right"></i></a></h4>
-        <h4><a href="login.php?lpage=sysadmin">System Administrator <i class="fas fa-arrow-right"></i></a></h4>
-    <?php }
-
-
-    ?>
-
     </div>
 
 
-
-<script type="text/javascript">
-  function viewPassword()
-  {
-    var passwordInput = document.getElementById('psw');
-    var passStatus = document.getElementById('pass-status');
    
-    if (passwordInput.type == 'password'){
-      passwordInput.type='text';
-      passStatus.className='fa fa-eye-slash';
-      
-    }
-    else{
-      passwordInput.type='password';
-      passStatus.className='fa fa-eye';
-    }
-  }
-</script>
-    
     </body>
 </html>

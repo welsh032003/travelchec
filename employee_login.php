@@ -195,11 +195,12 @@ header{
 
           // Check if username and password is blank
            if(empty($username)&&empty($password)){
-            $error= '<div class="alert alert-danger" role="alert">Enter Username and Password</div>';
+            $error= '<div class="alert alert-danger" role="alert">Email and password is required!</div>';
+
            }else{
 
            //Check Login Detail with database
-           $result=mysqli_query($conn,"SELECT * FROM user_accounts WHERE username='$username' AND password='".md5($password)."' ");
+           $result=mysqli_query($conn,"SELECT * FROM employee_details WHERE email='$username' AND password='".md5($password)."' ");
            $row=mysqli_fetch_assoc($result);
            $count=mysqli_num_rows($result);
 
@@ -207,12 +208,12 @@ header{
           if ($count==1) {
 
 
-          if ($row['UserType'] != $lrole && $row['UserType'] != 'sysadmin') {
-           $error= '<div class="alert alert-danger" role="alert">Access Denied</div>';
+          if ($row['status'] == 'disabled') {
+           $error= '<div class="alert alert-danger" role="alert">Access Denied - Your account was disabled</div>';
          }else{
 
            //Audit logim
-           $audit_type = "Login";
+           $audit_type = "Employee Login";
            $audit_message = "login successfully";
            $audit_insert = "INSERT INTO audit_system (`user`, `message`, `type`) VALUES ('$username', '$audit_message', '$audit_type') ";
            $audit_query = mysqli_query($conn, $audit_insert) or die(mysqli_error());
@@ -222,31 +223,19 @@ header{
            $_SESSION["login_time_stamp"] = time();
 
            //Define session varible
-            $_SESSION['user']=array(
+            $_SESSION['employee']=array(
            'id'=>$row['id'],
-           'username'=>$row['UserName'],
-           'role'=>$row['UserType']
+           'name'=>$row['first_name'],
+           'email'=>$row['email']
            );
-           $role=$_SESSION['user']['role'];
 
-
-           //Redirecting User Based on Role
-            switch($role){
-          case 'hr':
-          header('location: adminpage.php');
-          break;
-          case 'accounts':
-          header('location: adminpage.php');
-          break;
-          case 'sysadmin':
-          header('location: adminpage.php');
-          break;
-
-         }
-     }
+   
+           //Redirect employee to dashboard
+           header('location: employee_dashboard.php');
+    }
 
       }else {
-        $error='<div class="alert alert-danger" role="alert">No account found</div>';
+        $error='<div class="alert alert-danger" role="alert">Incorrect email and password</div>';
       }
      }
 
@@ -274,7 +263,6 @@ header{
           <input type="submit" id="login" name="login" value="Login"/><br/>
           </div>
           <div>
-          <a href="forget_password.php">Forget Password</a> <br/> <br/>
            
           </div>
         </form>
